@@ -1,0 +1,34 @@
+{
+    "name": "tunecino/yii2-nested-rest",
+    "type": "yii2-extension",
+    "description": "Adds nested resources routing support along with related actions and relationship handlers to the Yii RESTful API framework",
+    "keywords": [
+        "yii2",
+        "rest",
+        "nested",
+        "nested routes",
+        "nested resources",
+        "rest relationships"
+    ],
+    "license": "BSD-3-Clause",
+    "support": {
+        "issues": "https://github.com/tunecino/yii2-nested-rest/issues",
+        "forum": "http://www.yiiframework.com/forum/",
+        "wiki": "https://github.com/tunecino/yii2-nested-rest/wiki",
+        "source": "https://github.com/tunecino/yii2-nested-rest"
+    },
+    "authors": [
+        {
+            "name": "Salem Ouerdani",
+            "email": "tunecino@gmail.com"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "~2.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "tunecino\\nestedrest\\": "src"
+        }
+    }
+}
