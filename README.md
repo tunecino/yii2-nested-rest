@@ -1,5 +1,8 @@
 # yii2-nested-rest
 
+[![Packagist Version](https://img.shields.io/packagist/v/tunecino/yii2-nested-rest.svg?style=flat-square)](https://packagist.org/packages/tunecino/yii2-nested-rest)
+[![Total Downloads](https://img.shields.io/packagist/dt/tunecino/yii2-nested-rest.svg?style=flat-square)](https://packagist.org/packages/tunecino/yii2-nested-rest)
+
 Adds nested resources routing support along with related actions and relationship handlers to the [Yii RESTful API framework](http://www.yiiframework.com/doc-2.0/guide-rest-quick-start.html).
 
 **Note: This is an alpha release. while not yet covered by tests and version number is less than 1.0.0 extra precautions should be taken before using in production.**
