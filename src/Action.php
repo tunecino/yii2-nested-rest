@@ -72,7 +72,7 @@ class Action extends \yii\rest\Action
     }
 
     /**
-     * Gets the related model.
+     * Finds the related model.
      * @return \yii\db\ActiveRecordInterface.
      * @throws NotFoundHttpException if not found.
      */
@@ -93,14 +93,16 @@ class Action extends \yii\rest\Action
     /**
      * Finds the model or the list of models corresponding
      * to the specified primary keys values within the relative model retreived by [[getRelativeModel()]].
+     * @param string $IDs should hold the list of IDs related to the models to be loaded.
+     * it must be a string of the primary keys values separated by commas.
      * @return \yii\db\ActiveRecordInterface
      * @throws NotFoundHttpException if not found or not related.
      */
-    public function findCurrentModel($id)
+    public function findCurrentModels($IDs)
     {
         $modelClass = $this->modelClass;
         $pk = $modelClass::primaryKey()[0];
-        $ids = preg_split('/\s*,\s*/', $id, -1, PREG_SPLIT_NO_EMPTY);
+        $ids = preg_split('/\s*,\s*/', $IDs, -1, PREG_SPLIT_NO_EMPTY);
         $getter = 'get' . $this->relationName;
 
         $relModel = $this->getRelativeModel();

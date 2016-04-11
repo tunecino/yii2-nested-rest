@@ -50,6 +50,7 @@ class UrlRule extends Object implements UrlRuleInterface
      */
     public $tokens = [
         '{id}' => '<id:\\d[\\d,]*>',
+        '{IDs}' => '<IDs:\\d[\\d,]*>',
     ];
     /**
      * @var array list of possible patterns and the corresponding actions for creating the URL rules.
@@ -60,11 +61,11 @@ class UrlRule extends Object implements UrlRuleInterface
      * and tokens in it will be replaced by [[tokens]].
      */
     public $patterns = [
-        'GET,HEAD {id}' => 'nested-view',
+        'GET,HEAD {IDs}' => 'nested-view',
         'GET,HEAD' => 'nested-index',
         'POST' => 'nested-create',
-        'PUT {id}' => 'nested-link',
-        'DELETE {id}' => 'nested-unlink',
+        'PUT {IDs}' => 'nested-link',
+        'DELETE {IDs}' => 'nested-unlink',
         'DELETE' => 'nested-unlink-all',
         '{id}' => 'options',
         '' => 'options',

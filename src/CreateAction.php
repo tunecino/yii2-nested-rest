@@ -18,7 +18,7 @@ use yii\web\ServerErrorHttpException;
  *
  * @author Salem Ouerdani <tunecino@gmail.com>
  */
-class CreateAction extends NestedAction
+class CreateAction extends Action
 {
     /**
      * @var string the scenario to be assigned to the new model before it is validated and saved.

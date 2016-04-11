@@ -15,16 +15,17 @@ use Yii;
  *
  * @author Salem Ouerdani <tunecino@gmail.com>
  */
-class ViewAction extends NestedAction
+class ViewAction extends Action
 {
 	/**
      * Displays a model or a list of provided models.
-     * @param string $id the related primary key(s) of the model or list of models.
+     * @param string $IDs should hold the list of IDs related to the models to be loaded.
+     * it must be a string of the primary keys values separated by commas.
      * @return \yii\db\ActiveRecordInterface the model(s) being displayed
      */
-    public function run($id)
+    public function run($IDs)
     {
-        $model = $this->findCurrentModel($id);
+        $model = $this->findCurrentModels($IDs);
         if ($this->checkAccess) {
             call_user_func($this->checkAccess, $this->id, $model);
         }

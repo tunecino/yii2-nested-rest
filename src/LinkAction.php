@@ -17,7 +17,7 @@ use yii\helpers\StringHelper;
  *
  * @author Salem Ouerdani <tunecino@gmail.com>
  */
-class LinkAction extends NestedAction
+class LinkAction extends Action
 {
     /**
      * @var string the scenario to be assigned to the model representing 
@@ -29,18 +29,19 @@ class LinkAction extends NestedAction
      * Links two or more models or updates the related data stored in a junction table.
      * A '204' response should be set to headers if any change has been made.
      * A '304' response should be set to headers if no change is made.
-     * @param string $id the related primary key(s) of the model or list of models.
+     * @param string $IDs should hold the list of IDs related to the models to be linken with the relative one.
+     * it must be a string of the primary keys values separated by commas.
      * @throws NotFoundHttpException if model doesn't exist.
      * @throws ServerErrorHttpException if there is any error when linking the models
      * @throws ServerErrorHttpException if relation is many_to_many + both models are linked + no via() class provided + extraColumns provided via bodyParams.
      */
-    public function run($id)
+    public function run($IDs)
     {
         $relModel = $this->getRelativeModel();
 
         $modelClass = $this->modelClass;
         $pk = $modelClass::primaryKey()[0];
-        $ids = preg_split('/\s*,\s*/', $id, -1, PREG_SPLIT_NO_EMPTY);
+        $ids = preg_split('/\s*,\s*/', $IDs, -1, PREG_SPLIT_NO_EMPTY);
         $bodyParams = Yii::$app->request->bodyParams;
         $getter = 'get' . $this->relationName;
 

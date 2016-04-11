@@ -13,7 +13,7 @@ use yii\data\ActiveDataProvider;
 /**
  * @author Salem Ouerdani <tunecino@gmail.com>
  */
-class IndexAction extends NestedAction
+class IndexAction extends Action
 {
     /**
      * Prepares the data provider that should return the requested 

@@ -16,24 +16,26 @@ use yii\helpers\StringHelper;
  *
  * @author Salem Ouerdani <tunecino@gmail.com>
  */
-class UnlinkAction extends NestedAction
+class UnlinkAction extends Action
 {
     /**
      * Unlinks two or more models by provided primary key or a list of primary keys.
      * If the relation type is a many_to_many. related row in the junction table will be deleted.
      * Otherwise related foreign key will be simply set to NULL.
      * A '204' response should be set to headers if any change has been made.
-     * @param string $id the related primary key(s) of the model or list of models.
+     * @param string $IDs should hold the list of IDs related to the models to be unlinken from the relative one.
+     * it must be a string of the primary keys values separated by commas.
      * @throws BadRequestHttpException if any of the models are not linked.
+     * @throws InvalidCallException if the models cannot be unlinked
      */
-    public function run($id)
+    public function run($IDs)
     {
         $relModel = $this->getRelativeModel();
 
         $modelClass = $this->modelClass;
         $pk = $modelClass::primaryKey()[0];
         $getter = 'get' . $this->relationName;
-        $ids = preg_split('/\s*,\s*/', $id, -1, PREG_SPLIT_NO_EMPTY);
+        $ids = preg_split('/\s*,\s*/', $IDs, -1, PREG_SPLIT_NO_EMPTY);
 
         $to_unlink = [];
         foreach ($ids as $pk_value) {
