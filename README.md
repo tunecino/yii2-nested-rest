@@ -121,15 +121,15 @@ Those are all the possible configurations that may be set to the UrlManager in t
          * the default list of tokens that should be replaced for each pattern
          * in case you have a reason to replace them.
         */
-        'tokens' = [
+        'tokens' = [ /* optional */
             '{id}' => '<id:\\d[\\d,]*>',
             '{IDs}' => '<IDs:\\d[\\d,]*>',
-        ], /* optional */
+        ], 
         /**
          *  the default list of patterns. they may all be overridden here
          *  or just edited within $only, $except and $extraPatterns properties
          */
-        'patterns' => [ 
+        'patterns' => [ /* optional */
             'GET,HEAD {IDs}' => 'nested-view',
             'GET,HEAD' => 'nested-index',
             'POST' => 'nested-create',
@@ -138,7 +138,7 @@ Those are all the possible configurations that may be set to the UrlManager in t
             'DELETE' => 'nested-unlink-all',
             '{id}' => 'options',
             '' => 'options',
-        ], /* optional */
+        ], 
         /**
          *  list of acceptable actions.
          */
@@ -229,7 +229,7 @@ public function actions()
 ***1.*** This doesn't support composite keys. In fact one of my main concerns when building this extension was to figure out a clean alternative to not have to build resources for composite keys related models like the ones mapping a junction table. check the example provided in section ***7.*** for more details.
 
 ***2.*** When defining relation names in the config file they should match the method names implemented inside your model *(see [Declaring Relations](http://www.yiiframework.com/doc-2.0/guide-db-active-record.html#declaring-relations) section in the Yii guide for more details)*. 
-This extension will do the check and will throw an *InvalidConfigException* if they don't match but for performance reasons *(check [this](http://www.yiiframework.com/doc-2.0/guide-db-active-record.html#declaring-relations))* and because it make no sense to keep doing the same verification with each request when you already did correctly set a list of relations, this extension won't do that DB schema parsing anymore when the application is in *production* mode. in other words verification is made only when`YII_DEBUG` is true.
+This extension will do the check and will throw an *InvalidConfigException* if they don't match but for performance reasons *(check [this](http://www.yiiframework.com/doc-2.0/guide-runtime-routing.html#performance-consideration))* and because it make no sense to keep doing the same verification with each request when you already did correctly set a list of relations, this extension won't do that DB schema parsing anymore when the application is in *production* mode. in other words verification is made only when`YII_DEBUG` is true.
 
 ***3.*** When it comes to linking *many-to-many* relations with extra columns in a junction table it is highly recommended to use [via()](http://www.yiiframework.com/doc-2.0/yii-db-activerelationtrait.html#via%28%29-detail) instead of [viaTable()](http://www.yiiframework.com/doc-2.0/yii-db-activequery.html#viaTable%28%29-detail) so the intermediate class can be used by this extension to validate related attributes instead of using [link()](http://www.yiiframework.com/doc-2.0/yii-db-baseactiverecord.html#link%28%29-detail) and saving data without performing the appropriate validations. Refer to the [Relations via a Junction Table](http://www.yiiframework.com/doc-2.0/guide-db-active-record.html#junction-table) section in the Yii guide for more details.
 
