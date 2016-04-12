@@ -85,7 +85,7 @@ to the `require` section of your `composer.json` file.
 
 By default, all the properties used by the custom UrlRule class in this extension will be used to generate multiple instances of the built-in [yii\rest\UrlRule](http://www.yiiframework.com/doc-2.0/yii-rest-urlrule.html) so basically both classes are sharing similar configurations. 
 
-This is kind of template with all the possible configurations that may be set to the UrlManager in the app config file:
+Those are all the possible configurations that may be set to the UrlManager in the app config file:
 ```php
 'rules' => [
     [
@@ -134,7 +134,7 @@ This is kind of template with all the possible configurations that may be set to
             'GET,HEAD' => 'nested-index',
             'POST' => 'nested-create',
             'PUT {IDs}' => 'nested-link',
-            'DELETE {Ids}' => 'nested-unlink',
+            'DELETE {IDs}' => 'nested-unlink',
             'DELETE' => 'nested-unlink-all',
             '{id}' => 'options',
             '' => 'options',
