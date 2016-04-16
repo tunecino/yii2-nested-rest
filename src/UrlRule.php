@@ -159,17 +159,25 @@ class UrlRule extends Object implements UrlRuleInterface
         $link_attribute = isset($this->linkAttribute) ? $this->linkAttribute : $modelName . '_id';
         $this->config['prefix'] = $resourceName . '/<' .$link_attribute. ':\d+>';
 
-        foreach ($this->relations as $relation) {
+        foreach ($this->relations as $key => $value) {
+            if (is_int($key)) {
+                $relation = $value;
+                $urlName = Inflector::camel2id(Inflector::pluralize($relation));
+                $controller = Inflector::camel2id(Inflector::singularize($relation));
+            }
+            else {
+                $relation = $key;
+                if (is_array($value)) list($urlName, $controller) = each($value);
+                else {
+                    $urlName = Inflector::camel2id(Inflector::pluralize($relation));
+                    $controller = $value;
+                }
+            }
 
             if (YII_DEBUG) (new $this->modelClass)->getRelation($relation);
 
-            $name = Inflector::camel2id(Inflector::singularize($relation));
-            
-            if ($this->modulePrefix) {
-                $plural = Inflector::camel2id(Inflector::pluralize($relation));
-                $this->config['controller'][$plural] = $this->modulePrefix.'/'.$name;
-            }
-            else $this->config['controller'] = $name;
+            $modulePrefix = isset($this->modulePrefix) ? $this->modulePrefix .'/' : '';
+            $this->config['controller'][$urlName] = $modulePrefix . $controller;
 
             $this->setRulesFactory($this->config);
             $routeObj = $this->rulesFactory->parseRequest($manager, $request);
