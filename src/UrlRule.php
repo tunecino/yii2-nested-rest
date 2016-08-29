@@ -157,7 +157,7 @@ class UrlRule extends Object implements UrlRuleInterface
             $this->resourceName : Inflector::pluralize($modelName);
 
         $link_attribute = isset($this->linkAttribute) ? $this->linkAttribute : $modelName . '_id';
-        $this->config['prefix'] = $resourceName . '/<' .$link_attribute. ':\d+>';
+        $this->config['prefix'] = (isset($this->modulePrefix) ? $this->modulePrefix .'/' : '') . $resourceName . '/<' .$link_attribute. ':\d+>';
 
         foreach ($this->relations as $key => $value) {
             if (is_int($key)) {
