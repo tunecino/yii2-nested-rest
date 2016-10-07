@@ -8,6 +8,7 @@
 namespace tunecino\nestedrest;
 
 use Yii;
+use yii\helpers\VarDumper;
 use yii\web\UrlRuleInterface;
 use yii\base\Object;
 use yii\helpers\Inflector;
@@ -96,26 +97,45 @@ class UrlRule extends Object implements UrlRuleInterface
         'class' => 'yii\rest\UrlRule'
     ];
 
-    private $_rulesFactory;
+    private $_rulesFactories = [];
 
     /**
      * Returns the UrlRule instance used to generate related rules to each model.
      * @return UrlRuleInterface[]
      * @see config
      */
-    protected function getRulesFactory()
+    protected function getRulesFactories()
     {
-        return $this->_rulesFactory;
+    	if (empty($this->_rulesFactories)) {
+    		$this->buildFactories();
+		}
+
+        return $this->_rulesFactories;
+    }
+
+    /**
+     * Returns the UrlRule instance used to generate related rules to each model.
+     * @return UrlRuleInterface
+     * @see config
+     */
+    protected function getRulesFactory($relation)
+    {
+    	if (isset($this->_rulesFactories[$relation])) {
+        	return $this->_rulesFactories[$relation];
+		}
+
+		return null;
     }
 
     /**
      * Sets the UrlRule instance used to generate related rules to each model.
-     * @param $config
+     * @param string $relation
+     * @param UrlRuleInterface $factory
      * @see config
      */
-    protected function setRulesFactory($config)
+    protected function addRulesFactory($relation, UrlRuleInterface $factory)
     {
-        $this->_rulesFactory = Yii::createObject($config);
+        $this->_rulesFactories[$relation] = $factory;
     }
 
     /**
@@ -124,17 +144,28 @@ class UrlRule extends Object implements UrlRuleInterface
     public function init()
     {
         parent::init();
-        if (empty($this->modelClass))
+        if (empty($this->modelClass)) {
             throw new InvalidConfigException('"modelClass" must be set.');
+		}
 
-        if (empty($this->relations))
+        if (empty($this->relations)) {
             throw new InvalidConfigException('"relations" must be set.');
+		}
 
         $this->config['patterns'] = $this->patterns;
         $this->config['tokens'] = $this->tokens;
-        if (!empty($this->only)) $this->config['only'] = $this->only;
-        if (!empty($this->except)) $this->config['except'] = $this->except;
-        if (!empty($this->extraPatterns)) $this->config['extraPatterns'] = $this->extraPatterns;
+
+        if (!empty($this->only)) {
+        	$this->config['only'] = $this->only;
+		}
+
+        if (!empty($this->except)) {
+        	$this->config['except'] = $this->except;
+		}
+
+        if (!empty($this->extraPatterns)) {
+        	$this->config['extraPatterns'] = $this->extraPatterns;
+		}
     }
 
     /**
@@ -142,8 +173,17 @@ class UrlRule extends Object implements UrlRuleInterface
      */
     public function createUrl($manager, $route, $params) 
     {
+    	$factories	= $this->getRulesFactories();
         unset($params['relativeClass'], $params['relationName'], $params['linkAttribute']);
-        return $this->rulesFactory->createUrl($manager, $route, $params);
+
+        foreach ($factories as $relation => $factory) {
+        	$url = $factory->createUrl($manager, $route, $params);
+			if (!empty($url)) {
+				return $url;
+			}
+		}
+
+        return false;
     }
 
     /**
@@ -151,13 +191,30 @@ class UrlRule extends Object implements UrlRuleInterface
      */
     public function parseRequest($manager, $request)
     {
-        $modelName = Inflector::camel2id(StringHelper::basename($this->modelClass));
+    	$factories	= $this->getRulesFactories();
 
-        $resourceName = isset($this->resourceName) ? 
-            $this->resourceName : Inflector::pluralize($modelName);
+        foreach ($factories as $relation => $factory) {
+            $routeObj = $factory->parseRequest($manager, $request);
 
+            if ($routeObj && is_array($routeObj) && count($routeObj) > 1) {
+                $routeObj[1]['relativeClass'] 	= $this->modelClass;
+                $routeObj[1]['relationName'] 	= $relation;
+                $routeObj[1]['linkAttribute'] 	= isset($this->linkAttribute) ? $this->linkAttribute : Inflector::camel2id(StringHelper::basename($this->modelClass)) . '_id';
+
+                return $routeObj;
+            }
+        }
+
+        return false;
+    }
+
+
+    public function buildFactories() {
+    	$modelName = Inflector::camel2id(StringHelper::basename($this->modelClass));
+        $resourceName = isset($this->resourceName) ? $this->resourceName : Inflector::pluralize($modelName);
         $link_attribute = isset($this->linkAttribute) ? $this->linkAttribute : $modelName . '_id';
-        $this->config['prefix'] = $resourceName . '/<' .$link_attribute. ':\d+>';
+
+		$this->config['prefix'] = $resourceName . '/<' .$link_attribute. ':\d+>';
 
         foreach ($this->relations as $key => $value) {
             if (is_int($key)) {
@@ -167,29 +224,24 @@ class UrlRule extends Object implements UrlRuleInterface
             }
             else {
                 $relation = $key;
-                if (is_array($value)) list($urlName, $controller) = each($value);
-                else {
+                if (is_array($value)) {
+                	list($urlName, $controller) = each($value);
+				} else {
                     $urlName = Inflector::camel2id(Inflector::pluralize($relation));
                     $controller = $value;
                 }
             }
 
-            if (YII_DEBUG) (new $this->modelClass)->getRelation($relation);
+            if (YII_DEBUG) {
+            	(new $this->modelClass)->getRelation($relation);
+			}
 
             $modulePrefix = isset($this->modulePrefix) ? $this->modulePrefix .'/' : '';
             $this->config['controller'][$urlName] = $modulePrefix . $controller;
 
-            $this->setRulesFactory($this->config);
-            $routeObj = $this->rulesFactory->parseRequest($manager, $request);
+			$factory = Yii::createObject($this->config);
 
-            if ($routeObj) {
-                $routeObj[1]['relativeClass'] = $this->modelClass;
-                $routeObj[1]['relationName'] = $relation;
-                $routeObj[1]['linkAttribute'] = $link_attribute;
-                return $routeObj;
-            }
-        }
-
-        return false;
-    }
+            $this->addRulesFactory($relation, $factory);
+		}
+	}
 }
