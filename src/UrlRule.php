@@ -142,8 +142,11 @@ class UrlRule extends Object implements UrlRuleInterface
      */
     public function createUrl($manager, $route, $params) 
     {
-        unset($params['relativeClass'], $params['relationName'], $params['linkAttribute']);
-        return $this->rulesFactory->createUrl($manager, $route, $params);
+        if ($this->rulesFactory) {
+            unset($params['relativeClass'], $params['relationName'], $params['linkAttribute']);
+            return $this->rulesFactory->createUrl($manager, $route, $params);
+        }
+        return false;
     }
 
     /**
