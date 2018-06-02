@@ -9,7 +9,7 @@ namespace tunecino\nestedrest;
 
 use Yii;
 use yii\web\UrlRuleInterface;
-use yii\base\Object;
+use yii\base\BaseObject;
 use yii\helpers\Inflector;
 use yii\helpers\StringHelper;
 use yii\base\InvalidConfigException;
@@ -18,7 +18,7 @@ use yii\base\InvalidConfigException;
  * UrlRule is a custom implementation that creates multi instances of a UrlRuleInterface[] to generate nested rules based in model relations.
  * @author Salem Ouerdani <tunecino@gmail.com>
  */
-class UrlRule extends Object implements UrlRuleInterface
+class UrlRule extends BaseObject implements UrlRuleInterface
 {
     /**
      * @var string class name of the model which will be used to generate related rules.
