@@ -8,15 +8,19 @@
 namespace tunecino\nestedrest;
 
 use Yii;
-use yii\web\UrlRuleInterface;
 use yii\base\BaseObject;
+use yii\base\InvalidConfigException;
+use yii\db\ActiveRecordInterface;
 use yii\helpers\Inflector;
 use yii\helpers\StringHelper;
-use yii\base\InvalidConfigException;
+use yii\web\UrlRuleInterface;
 
 /**
  * UrlRule is a custom implementation that creates multi instances of a UrlRuleInterface[] to generate nested rules based in model relations.
+ *
  * @author Salem Ouerdani <tunecino@gmail.com>
+ *
+ * @property \yii\web\UrlRuleInterface $rulesFactory
  */
 class UrlRule extends BaseObject implements UrlRuleInterface
 {
@@ -52,6 +56,10 @@ class UrlRule extends BaseObject implements UrlRuleInterface
         '{id}' => '<id:\\d[\\d,]*>',
         '{IDs}' => '<IDs:\\d[\\d,]*>',
     ];
+    /**
+     * @var string
+     */
+    public $pkPattern = '\d+';
     /**
      * @var array list of possible patterns and the corresponding actions for creating the URL rules.
      * The keys are the patterns and the values are the corresponding actions.
@@ -110,8 +118,11 @@ class UrlRule extends BaseObject implements UrlRuleInterface
 
     /**
      * Sets the UrlRule instance used to generate related rules to each model.
+     *
      * @param $config
+     *
      * @see config
+     * @throws InvalidConfigException
      */
     protected function setRulesFactory($config)
     {
@@ -120,6 +131,7 @@ class UrlRule extends BaseObject implements UrlRuleInterface
 
     /**
      * @inheritdoc
+     * @throws InvalidConfigException
      */
     public function init()
     {
@@ -151,16 +163,18 @@ class UrlRule extends BaseObject implements UrlRuleInterface
 
     /**
      * @inheritdoc
+     * @throws InvalidConfigException
      */
     public function parseRequest($manager, $request)
     {
         $modelName = Inflector::camel2id(StringHelper::basename($this->modelClass));
 
-        $resourceName = isset($this->resourceName) ? 
-            $this->resourceName : Inflector::pluralize($modelName);
+        $resourceName = isset($this->resourceName)
+            ? $this->resourceName
+            : Inflector::pluralize($modelName);
 
         $link_attribute = isset($this->linkAttribute) ? $this->linkAttribute : $modelName . '_id';
-        $this->config['prefix'] = $resourceName . '/<' .$link_attribute. ':\d+>';
+        $this->config['prefix'] = (isset($this->modulePrefix) ? $this->modulePrefix . '/' : '') . $resourceName . '/<' .$link_attribute. ':' . $this->pkPattern . '>';
 
         foreach ($this->relations as $key => $value) {
             if (is_int($key)) {
@@ -177,7 +191,11 @@ class UrlRule extends BaseObject implements UrlRuleInterface
                 }
             }
 
-            if (YII_DEBUG) (new $this->modelClass)->getRelation($relation);
+            if (YII_DEBUG) {
+                /** @var ActiveRecordInterface $class */
+                $class = new $this->modelClass;
+                $class->getRelation($relation);
+            };
 
             $modulePrefix = isset($this->modulePrefix) ? $this->modulePrefix .'/' : '';
             $this->config['controller'][$urlName] = $modulePrefix . $controller;
