@@ -42,8 +42,9 @@ class CreateAction extends Action
      */
     public function run()
     {
-        if ($this->checkAccess) 
+        if ($this->checkAccess) {
             call_user_func($this->checkAccess, $this->id);
+        }
 
         $relModel = $this->getRelativeModel();
         $relType = $relModel->getRelation($this->relationName);
@@ -61,21 +62,25 @@ class CreateAction extends Action
             $model_attributes = $model->safeAttributes();
             $junction = [];
             foreach ($viaData as $key => $value) {
-                if (!in_array($key, $model_attributes)) $junction[$key] = $value;
+                if (!in_array($key, $model_attributes)) {
+                    $junction[$key] = $value;
+                }
             }
             $viaData = $junction;
         }
 
         $model->load($bodyParams, '');
 
-        if ($model->save() === false && !$model->hasErrors()) 
+        if ($model->save() === false && !$model->hasErrors()) {
             throw new ServerErrorHttpException('Failed to update the object for unknown reason.');
-        else if ($model->hasErrors()) return $model;
+        } else if ($model->hasErrors()) {
+            return $model;
+        }
 
         $id = implode(',', array_values($model->getPrimaryKey(true)));
 
         if ($isManyToMany) {
-            $extraColumns = $viaData === null ? [] : $viaData ;
+            $extraColumns = $viaData === null ? [] : $viaData;
 
             if ($isManyToMany_viaClass) {
                 $viaRelation = $relType->via[1];
@@ -84,8 +89,9 @@ class CreateAction extends Action
                 $viaModel = new $viaClass;
                 $viaModel->scenario = $this->viaScenario;
 
-                if ($this->checkAccess) 
+                if ($this->checkAccess) {
                     call_user_func($this->checkAccess, $this->id, $viaModel);
+                }
 
                 $modelClass = $this->modelClass;
                 $pk = $modelClass::primaryKey()[0];
@@ -93,21 +99,25 @@ class CreateAction extends Action
                 $attributes = array_merge([
                     $this->linkAttribute => $this->relative_id,
                     $relType->link[$pk] => $id
-                ],$extraColumns);
+                ], $extraColumns);
 
                 $viaModel->load($attributes, '');
 
-                if ($viaModel->save() === false && !$viaModel->hasErrors())
+                if ($viaModel->save() === false && !$viaModel->hasErrors()) {
                     throw new ServerErrorHttpException('Failed to update the object for unknown reason.');
-                else if ($viaModel->hasErrors()) return $viaModel;
+                } else if ($viaModel->hasErrors()) {
+                    return $viaModel;
+                }
+            } else {
+                $relModel->link($this->relationName, $model, $extraColumns);
             }
-            else $relModel->link($this->relationName, $model, $extraColumns);
+        } else {
+            $relModel->link($this->relationName, $model);
         }
-        else $relModel->link($this->relationName, $model);
 
         $response = Yii::$app->getResponse();
         $response->setStatusCode(201);
-        $response->getHeaders()->set('Location', Url::to('',true) . '/' . $id);
+        $response->getHeaders()->set('Location', Url::to('', true) . '/' . $id);
 
         return $model;
     }

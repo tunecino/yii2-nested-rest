@@ -56,10 +56,9 @@ class LinkAction extends Action
             
             if ($linked === false) {
                 $exist = $modelClass::find()->andWhere([$pk => $pk_value])->exists();
-                
-                if ($exist === false)
+                if ($exist === false) {
                     throw new NotFoundHttpException(StringHelper::basename($modelClass) . " '$pk_value' not found.");
-                
+                }  
                 $to_link[] = $isManyToMany_viaClass ? $pk_value : $this->findModel($pk_value);
             }
         }
@@ -69,18 +68,17 @@ class LinkAction extends Action
             $viaRelation = $relType->via[1];
             $viaClass = $viaRelation->modelClass;
 
-            if (count($to_link) === 0 && count($bodyParams)===0) 
+            if (count($to_link) === 0 && count($bodyParams)===0) {
                 Yii::$app->getResponse()->setStatusCode(304);
-
-            else {
+            } else {
                 foreach ($ids as $pk_value) {
-
                     if (in_array($pk_value, $to_link)) {
                         $viaModel = new $viaClass;
                         $viaModel->scenario = $this->viaScenario;
 
-                        if ($this->checkAccess) 
+                        if ($this->checkAccess) {
                             call_user_func($this->checkAccess, $this->id, $viaModel);
+                        }
 
                         $attributes = array_merge([
                             $this->linkAttribute => $this->relative_id,
@@ -88,26 +86,26 @@ class LinkAction extends Action
                         ],$bodyParams);
 
                         $viaModel->load($attributes, '');
-                    }
-
-                    else {
+                    } else {
                         // already linked -> update data in junction table.
                         $viaModel = $viaClass::findOne([
                             $this->linkAttribute => $this->relative_id,
                             $relType->link[$pk] => $pk_value
                         ]);
 
-                        if ($this->checkAccess) 
+                        if ($this->checkAccess) {
                             call_user_func($this->checkAccess, $this->id, $viaModel);
+                        }
 
                         $viaModel->scenario = $this->viaScenario;
                         $viaModel->load($bodyParams, '');
                     }
 
-                    if ($viaModel->save() === false && !$viaModel->hasErrors())
+                    if ($viaModel->save() === false && !$viaModel->hasErrors()) {
                         throw new ServerErrorHttpException('Failed to update the object for unknown reason.');
-
-                    else if ($viaModel->hasErrors()) return $viaModel;
+                    } else if ($viaModel->hasErrors()) {
+                        return $viaModel;
+                    }
                 }
                 Yii::$app->getResponse()->setStatusCode(204);
             }
@@ -118,17 +116,15 @@ class LinkAction extends Action
             $extraColumns = $isManyToMany ? $bodyParams : [];
             
             // junction table update is expected. inserting 2nd record won't be valid solution.
-            if (count($to_link) === 0 && count($extraColumns) > 0) 
+            if (count($to_link) === 0 && count($extraColumns) > 0) {
                 throw new ServerErrorHttpException('objects already linked.');
-
-            else if (count($to_link) === 0) 
+            } else if (count($to_link) === 0) {
                 Yii::$app->getResponse()->setStatusCode(304);
-
-            else {
+            } else {
                 foreach ($to_link as $model) {
-                    if ($this->checkAccess) 
+                    if ($this->checkAccess) {
                         call_user_func($this->checkAccess, $this->id, $model);
-
+                    }
                     $relModel->link($this->relationName, $model, $extraColumns);
                 }
                 Yii::$app->getResponse()->setStatusCode(204);

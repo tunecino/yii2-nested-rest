@@ -131,23 +131,31 @@ class UrlRule extends BaseObject implements UrlRuleInterface
     public function init()
     {
         parent::init();
-        if (empty($this->modelClass))
+        if (empty($this->modelClass)) {
             throw new InvalidConfigException('"modelClass" must be set.');
+        }
 
-        if (empty($this->relations))
+        if (empty($this->relations)) {
             throw new InvalidConfigException('"relations" must be set.');
+        }
 
         $this->config['patterns'] = $this->patterns;
         $this->config['tokens'] = $this->tokens;
-        if (!empty($this->only)) $this->config['only'] = $this->only;
-        if (!empty($this->except)) $this->config['except'] = $this->except;
-        if (!empty($this->extraPatterns)) $this->config['extraPatterns'] = $this->extraPatterns;
+        if (!empty($this->only)) {
+            $this->config['only'] = $this->only;
+        }
+        if (!empty($this->except)) {
+            $this->config['except'] = $this->except;
+        }
+        if (!empty($this->extraPatterns)) {
+            $this->config['extraPatterns'] = $this->extraPatterns;
+        }
     }
 
     /**
      * @inheritdoc
      */
-    public function createUrl($manager, $route, $params) 
+    public function createUrl($manager, $route, $params)
     {
         if ($this->rulesFactory) {
             unset($params['relativeClass'], $params['relationName'], $params['linkAttribute']);
@@ -163,34 +171,35 @@ class UrlRule extends BaseObject implements UrlRuleInterface
     {
         $modelName = Inflector::camel2id(StringHelper::basename($this->modelClass));
 
-        if ( isset($this->resourceName) ) {
+        if (isset($this->resourceName)) {
             $resourceName = $this->resourceName;
-        }
-        else {
+        } else {
             $resourceName = $this->pluralize ? Inflector::pluralize($modelName) : $modelName;
         }
 
         $link_attribute = isset($this->linkAttribute) ? $this->linkAttribute : $modelName . '_id';
-        $this->config['prefix'] = $resourceName . '/<' .$link_attribute. ':\d+>';
+        $this->config['prefix'] = $resourceName . '/<' . $link_attribute . ':\d+>';
 
         foreach ($this->relations as $key => $value) {
             if (is_int($key)) {
                 $relation = $value;
                 $urlName = $this->pluralize ? Inflector::camel2id(Inflector::pluralize($relation)) : Inflector::camel2id($relation);
                 $controller = Inflector::camel2id(Inflector::singularize($relation));
-            }
-            else {
+            } else {
                 $relation = $key;
-                if (is_array($value)) list($urlName, $controller) = each($value);
-                else {
+                if (is_array($value)) {
+                    list($urlName, $controller) = each($value);
+                } else {
                     $urlName = $this->pluralize ? Inflector::camel2id(Inflector::pluralize($relation)) : Inflector::camel2id($relation);
                     $controller = $value;
                 }
             }
 
-            if (YII_DEBUG) (new $this->modelClass)->getRelation($relation);
+            if (YII_DEBUG) {
+                (new $this->modelClass)->getRelation($relation);
+            }
 
-            $modulePrefix = isset($this->modulePrefix) ? $this->modulePrefix .'/' : '';
+            $modulePrefix = isset($this->modulePrefix) ? $this->modulePrefix . '/' : '';
             $this->config['controller'][$urlName] = $modulePrefix . $controller;
 
             $this->setRulesFactory($this->config);

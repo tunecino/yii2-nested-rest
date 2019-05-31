@@ -40,20 +40,22 @@ class UnlinkAction extends Action
         $to_unlink = [];
         foreach ($ids as $pk_value) {
             $linked = $relModel->$getter()->andWhere([$pk => $pk_value])->exists();
-            if ($linked === true) $to_unlink []= $this->findModel($pk_value);
-            else throw new BadRequestHttpException(StringHelper::basename($modelClass) . " '$pk_value' not linked to ".StringHelper::basename($this->relativeClass)." '$this->relative_id'.");
+            if ($linked === true) {
+                $to_unlink[] = $this->findModel($pk_value);
+            } else {
+                throw new BadRequestHttpException(StringHelper::basename($modelClass) . " '$pk_value' not linked to ".StringHelper::basename($this->relativeClass)." '$this->relative_id'.");
+            }
         }
 
         $relType = $relModel->getRelation($this->relationName);
         $delete = ($relType->multiple === true && $relType->via !== null);
 
         foreach ($to_unlink as $model) {
-            if ($this->checkAccess) 
+            if ($this->checkAccess) {
                 call_user_func($this->checkAccess, $this->id, $model);
-
+            }
             $relModel->unlink($this->relationName, $model, $delete);
         }
-
         Yii::$app->getResponse()->setStatusCode(204);
     }
 }

@@ -16,7 +16,7 @@ use Yii;
  */
 class UnlinkAllAction extends Action
 {
-	/**
+    /**
      * Unlinks all the related models.
      * If the relation type is a many_to_many. related row in the junction table will be deleted.
      * Otherwise related foreign key will be simply set to NULL.
@@ -26,7 +26,7 @@ class UnlinkAllAction extends Action
     public function run()
     {
         $relModel = $this->getRelativeModel();
-        
+
         $relType = $relModel->getRelation($this->relationName);
         $delete = ($relType->multiple === true && $relType->via !== null);
 

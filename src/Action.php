@@ -49,8 +49,9 @@ class Action extends \yii\rest\Action
         parent::init();
         $params = Yii::$app->request->queryParams;
 
-        if ($this->expectedParams($params) === false)
+        if ($this->expectedParams($params) === false) {
             throw new InvalidConfigException("unexpected configurations.");
+        }
 
         $this->relativeClass = $params['relativeClass'];
         $this->relationName  = $params['relationName'];
@@ -66,8 +67,9 @@ class Action extends \yii\rest\Action
     {
         $expected = ['relativeClass', 'relationName', 'linkAttribute'];
         foreach ($expected as $attr) {
-            if (isset($params[$attr]) === false) return false;
-            if ($attr === 'linkAttribute' && isset($params[$params[$attr]]) === false) return false;
+            if (isset($params[$attr]) === false || ($attr === 'linkAttribute' && isset($params[$params[$attr]]) === false)) {
+                return false;
+            }
         }
         return true;
     }
@@ -82,11 +84,13 @@ class Action extends \yii\rest\Action
         $relativeClass = $this->relativeClass;
         $relModel = $relativeClass::findOne($this->relative_id);
 
-        if ($relModel === null)
+        if ($relModel === null) {
             throw new NotFoundHttpException(StringHelper::basename($relativeClass) . " '$this->relative_id' not found.");
+        }
 
-        if ($this->checkAccess)
+        if ($this->checkAccess) {
             call_user_func($this->checkAccess, $this->id, $relModel);
+        }
 
         return $relModel;
     }
