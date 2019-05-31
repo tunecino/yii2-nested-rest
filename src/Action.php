@@ -107,7 +107,7 @@ class Action extends \yii\rest\Action
         $getter = 'get' . $this->relationName;
 
         $relModel = $this->getRelativeModel();
-        $q = $relModel->$getter()->where([$pk => $ids]);
+        $q = $relModel->$getter()->andWhere([$pk => $ids]);
 
         $ci = count($ids);
         $model = $ci > 1 ? $q->all() : $q->one();

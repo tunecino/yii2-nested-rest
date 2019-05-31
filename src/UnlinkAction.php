@@ -39,7 +39,7 @@ class UnlinkAction extends Action
 
         $to_unlink = [];
         foreach ($ids as $pk_value) {
-            $linked = $relModel->$getter()->where([$pk => $pk_value])->exists();
+            $linked = $relModel->$getter()->andWhere([$pk => $pk_value])->exists();
             if ($linked === true) $to_unlink []= $this->findModel($pk_value);
             else throw new BadRequestHttpException(StringHelper::basename($modelClass) . " '$pk_value' not linked to ".StringHelper::basename($this->relativeClass)." '$this->relative_id'.");
         }

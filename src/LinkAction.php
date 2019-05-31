@@ -52,10 +52,10 @@ class LinkAction extends Action
 
         $to_link = [];
         foreach ($ids as $pk_value) {
-            $linked = $relModel->$getter()->where([$pk => $pk_value])->exists();
+            $linked = $relModel->$getter()->andWhere([$pk => $pk_value])->exists();
             
             if ($linked === false) {
-                $exist = $modelClass::find()->where([$pk => $pk_value])->exists();
+                $exist = $modelClass::find()->andWhere([$pk => $pk_value])->exists();
                 
                 if ($exist === false)
                     throw new NotFoundHttpException(StringHelper::basename($modelClass) . " '$pk_value' not found.");
