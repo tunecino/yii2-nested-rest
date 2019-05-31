@@ -97,6 +97,13 @@ class UrlRule extends BaseObject implements UrlRuleInterface
     ];
 
     private $_rulesFactory;
+    /**
+     * @var bool whether to automatically pluralize the URL names for controllers.
+     * If true, a controller ID will appear in plural form in URLs. For example, `user` controller
+     * will appear as `users` in URLs.
+     * @see controller
+     */
+    public $pluralize = true;
 
     /**
      * Returns the UrlRule instance used to generate related rules to each model.
@@ -156,8 +163,12 @@ class UrlRule extends BaseObject implements UrlRuleInterface
     {
         $modelName = Inflector::camel2id(StringHelper::basename($this->modelClass));
 
-        $resourceName = isset($this->resourceName) ? 
-            $this->resourceName : Inflector::pluralize($modelName);
+        if ( isset($this->resourceName) ) {
+            $resourceName = $this->resourceName;
+        }
+        else {
+            $resourceName = $this->pluralize ? Inflector::pluralize($modelName) : $modelName;
+        }
 
         $link_attribute = isset($this->linkAttribute) ? $this->linkAttribute : $modelName . '_id';
         $this->config['prefix'] = $resourceName . '/<' .$link_attribute. ':\d+>';
@@ -165,14 +176,14 @@ class UrlRule extends BaseObject implements UrlRuleInterface
         foreach ($this->relations as $key => $value) {
             if (is_int($key)) {
                 $relation = $value;
-                $urlName = Inflector::camel2id(Inflector::pluralize($relation));
+                $urlName = $this->pluralize ? Inflector::camel2id(Inflector::pluralize($relation)) : Inflector::camel2id($relation);
                 $controller = Inflector::camel2id(Inflector::singularize($relation));
             }
             else {
                 $relation = $key;
                 if (is_array($value)) list($urlName, $controller) = each($value);
                 else {
-                    $urlName = Inflector::camel2id(Inflector::pluralize($relation));
+                    $urlName = $this->pluralize ? Inflector::camel2id(Inflector::pluralize($relation)) : Inflector::camel2id($relation);
                     $controller = $value;
                 }
             }
