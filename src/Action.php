@@ -30,12 +30,12 @@ class Action extends \yii\rest\Action
      */
     protected $relationName;
     /**
-      * @var string name of the attribute name used as a foreign key in the related model. also used to build the 'prefix'.
+     * @var string name of the attribute name used as a foreign key in the related model. also used to build the 'prefix'.
      * This should be provided by the UrlClass within queryParams.
      */
     protected $linkAttribute;
     /**
-      * @var primary key value of the linkAttribute.
+     * @var primary key value of the linkAttribute.
      * This should be provided by the UrlClass within queryParams.
      * @see linkAttribute
      */
@@ -62,8 +62,9 @@ class Action extends \yii\rest\Action
      * Checks if the expected params that should be provided by the custom UrlClass are not missing.
      * @return Bolean.
      */
-    protected function expectedParams($params) {
-        $expected = ['relativeClass','relationName','linkAttribute'];
+    protected function expectedParams($params)
+    {
+        $expected = ['relativeClass', 'relationName', 'linkAttribute'];
         foreach ($expected as $attr) {
             if (isset($params[$attr]) === false) return false;
             if ($attr === 'linkAttribute' && isset($params[$params[$attr]]) === false) return false;
@@ -79,7 +80,7 @@ class Action extends \yii\rest\Action
     public function getRelativeModel()
     {
         $relativeClass = $this->relativeClass;
-        $relModel = $relativeClass::findOne($this->relative_id);  
+        $relModel = $relativeClass::findOne($this->relative_id);
 
         if ($relModel === null)
             throw new NotFoundHttpException(StringHelper::basename($relativeClass) . " '$this->relative_id' not found.");
@@ -106,12 +107,14 @@ class Action extends \yii\rest\Action
         $getter = 'get' . $this->relationName;
 
         $relModel = $this->getRelativeModel();
-        
         $q = $relModel->$getter()->where([$pk => $ids]);
-        $model = count($ids) > 1 ? $q->all() : $q->one();
 
-        if ($model === null or count($model) !== count($ids)) 
+        $ci = count($ids);
+        $model = $ci > 1 ? $q->all() : $q->one();
+
+        if ($model === null || (is_array($model) && count($model) !== $ci)) {
             throw new NotFoundHttpException("Not found or unrelated objects.");
+        }
 
         return $model;
     }
