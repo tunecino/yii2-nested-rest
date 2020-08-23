@@ -53,6 +53,30 @@ class UrlRule extends BaseObject implements UrlRuleInterface
         '{IDs}' => '<IDs:\\d[\\d,]*>',
     ];
     /**
+     * @var string The Regular Expressions Syntax used to parse the id of the main resource from url.
+     * For example, in the following final rule, $linkAttributePattern is default to that `\d+` to parse $brand_id value:
+     * 
+     *     GET,HEAD v1/brands/<brand_id:\d+>/items/<IDs:\d[\d,]*>
+     * 
+     * While that works fine with digital IDs, in a system using a different format, like uuid for example,
+     * you may use $linkAttributePattern to define different patterns. Something like this maybe:
+     * 
+     * [
+     *       // Nested Rules Brand
+     *      'class' => 'tunecino\nestedrest\UrlRule',
+     *      'modelClass' => 'app\modules\v1\models\Brand',
+     *      'modulePrefix' => 'v1',
+     *      'resourceName' => 'v1/brands',
+     *      'relations' => ['items'],
+     *      'tokens' => [
+     *          '{id}' => '<id:[a-f0-9]{8}\\-[a-f0-9]{4}\\-4[a-f0-9]{3}\\-(8|9|a|b)[a-f0-9]{3}\\-[a-f0-9]{12}>',
+     *          '{IDs}' => '<IDs:([a-f0-9]{8}\\-[a-f0-9]{4}\\-4[a-f0-9]{3}\\-(8|9|a|b)[a-f0-9]{3}\\-[a-f0-9]{12}(?:,|$))*>',
+     *      ],
+     *      'linkAttributePattern' => '[a-f0-9]{8}\\-[a-f0-9]{4}\\-4[a-f0-9]{3}\\-(8|9|a|b)[a-f0-9]{3}\\-[a-f0-9]{12}',
+     *  ],
+     */
+    public $linkAttributePattern = '\d+';
+    /**
      * @var array list of possible patterns and the corresponding actions for creating the URL rules.
      * The keys are the patterns and the values are the corresponding actions.
      * The format of patterns is `Verbs Pattern`, where `Verbs` stands for a list of HTTP verbs separated
@@ -178,7 +202,7 @@ class UrlRule extends BaseObject implements UrlRuleInterface
         }
 
         $link_attribute = isset($this->linkAttribute) ? $this->linkAttribute : $modelName . '_id';
-        $this->config['prefix'] = $resourceName . '/<' . $link_attribute . ':\d+>';
+        $this->config['prefix'] = $resourceName . '/<' . $link_attribute . ':' . $this->linkAttributePattern . '>';
 
         foreach ($this->relations as $key => $value) {
             if (is_int($key)) {
