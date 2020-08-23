@@ -188,7 +188,7 @@ class UrlRule extends BaseObject implements UrlRuleInterface
             } else {
                 $relation = $key;
                 if (is_array($value)) {
-                    list($urlName, $controller) = each($value);
+                    list($urlName, $controller) = [key($value), current($value)];
                 } else {
                     $urlName = $this->pluralize ? Inflector::camel2id(Inflector::pluralize($relation)) : Inflector::camel2id($relation);
                     $controller = $value;
