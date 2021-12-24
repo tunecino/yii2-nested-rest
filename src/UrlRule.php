@@ -55,12 +55,12 @@ class UrlRule extends BaseObject implements UrlRuleInterface
     /**
      * @var string The Regular Expressions Syntax used to parse the id of the main resource from url.
      * For example, in the following final rule, $linkAttributePattern is default to that `\d+` to parse $brand_id value:
-     * 
+     *
      *     GET,HEAD v1/brands/<brand_id:\d+>/items/<IDs:\d[\d,]*>
-     * 
+     *
      * While that works fine with digital IDs, in a system using a different format, like uuid for example,
      * you may use $linkAttributePattern to define different patterns. Something like this maybe:
-     * 
+     *
      * [
      *       // Nested Rules Brand
      *      'class' => 'tunecino\nestedrest\UrlRule',
@@ -204,6 +204,7 @@ class UrlRule extends BaseObject implements UrlRuleInterface
         $link_attribute = isset($this->linkAttribute) ? $this->linkAttribute : $modelName . '_id';
         $this->config['prefix'] = $resourceName . '/<' . $link_attribute . ':' . $this->linkAttributePattern . '>';
 
+        $allRelationsConfig = $this->config;
         foreach ($this->relations as $key => $value) {
             if (is_int($key)) {
                 $relation = $value;
@@ -224,10 +225,13 @@ class UrlRule extends BaseObject implements UrlRuleInterface
             }
 
             $modulePrefix = isset($this->modulePrefix) ? $this->modulePrefix . '/' : '';
-            $this->config['controller'][$urlName] = $modulePrefix . $controller;
+            $config = $this->config;
+            $config['controller'][$urlName] = $modulePrefix . $controller;
+            $allRelationsConfig['controller'][$urlName] = $modulePrefix . $controller;
 
-            $this->setRulesFactory($this->config);
-            $routeObj = $this->rulesFactory->parseRequest($manager, $request);
+            /** @var \yii\rest\UrlRule $urlRule */
+            $urlRule = Yii::createObject($config);
+            $routeObj = $urlRule->parseRequest($manager, $request);
 
             if ($routeObj) {
                 $routeObj[1]['relativeClass'] = $this->modelClass;
@@ -236,6 +240,8 @@ class UrlRule extends BaseObject implements UrlRuleInterface
                 return $routeObj;
             }
         }
+
+        $this->setRulesFactory($allRelationsConfig);
 
         return false;
     }
